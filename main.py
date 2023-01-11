@@ -9,16 +9,39 @@ EXITGAME = False
 GAMEOVER = False
 PONG_COLOR = (244, 214, 11)
 CLOCK = pygame.time.Clock()
-FPS = 30
+FPS = 60
 SCREEN = pygame.display.set_mode((1200,600),pygame.RESIZABLE)
 pygame.display.set_caption("PingPong Game - By Parth")
+pygame.display.set_icon(pygame.image.load('pp.png'))
+
+Survival_time = 0
 
 #Ball
+WIDTH = 1200
+HEIGHT = 600
 b_x = 600 
 b_y = 300
 x_add = True
 y_add = True
+b_speed = 0.01*WIDTH
+counter  = 0
 
+#Making High Score
+try :
+    with open('hiscore.txt') as file:
+        HISCORE = int(file.read())
+except Exception as e:
+    f = open('hiscore.txt','w')
+    f.write("0") 
+    HISCORE = 0
+
+def checkScore():
+    global Survival_time,HISCORE
+    if Survival_time>HISCORE:
+        HISCORE = Survival_time
+        return True
+    
+    
 def loadImage(path):
     return pygame.image.load(path)
 
@@ -28,16 +51,24 @@ def resizeImage(img,height,width):
 def blitImage(img,screen,x,y):
     return screen.blit(img,(x,y))
 
+def renderText(fontfile,text,x,y,fontsize):
+    font = pygame.font.Font(fontfile,fontsize)
+    font = font.render(text,True,(0,0,0),PONG_COLOR)
+    SCREEN.blit(font,(x,y))
+
+
 def restartGame():
     pygame.time.wait(2000)
-    global y_add,x_add,b_y,b_x,GAMEOVER,b_speed
+    global y_add,x_add,b_y,b_x,GAMEOVER,b_speed,Survival_time
     x_add = True
     y_add= True
     b_x = WIDTH//2
     b_y = HEIGHT//2
     b_speed += 2
-    
+    Survival_time  = 0
     GAMEOVER = False
+    with open('hiscore.txt','w') as f:
+            f.write(str(HISCORE))
 
 def checkGameOver():
     global GAMEOVER
@@ -83,6 +114,8 @@ def slider_collisons(slider_rect,ball_rect):
     else:
         return False
 
+
+
 def bounce(x_Add,y_Add,slider_rect,ball_rect,computer_slider_rect):
     def bouncey(y_a):
         if y_a:
@@ -116,8 +149,18 @@ def bounce(x_Add,y_Add,slider_rect,ball_rect,computer_slider_rect):
 while not EXITGAME:
     for event in pygame.event.get():
         if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+            with open('hiscore.txt','w') as f:
+                f.write(str(HISCORE))
             EXITGAME = True
 
+    counter += 1
+
+
+    if counter%(FPS*20)==0:
+        b_speed += 2
+
+    if counter%FPS==0:
+     Survival_time  += 1
 
     #Height And Width
     WIDTH = pygame.display.get_window_size()[0]
@@ -158,7 +201,6 @@ while not EXITGAME:
         y_add = bounce(x_add,y_add,playerSlider_RECT,Ball,computerSlider_RECT)[1]
     except Exception as e:
         print(e)
-    b_speed = 7
     b_x = moveBall(b_x,b_y,b_speed,x_add,y_add)[0]
     b_y = moveBall(b_x,b_y,b_speed,x_add,y_add)[1]
 
@@ -181,6 +223,18 @@ while not EXITGAME:
     checkGameOver()
     if GAMEOVER:
         restartGame()
+
+    checkScore()
+
+    #Rendering Survival Time
+    text = f"SURVIVAL TIME  {Survival_time} secs"
+    size  =  int(0.05*WIDTH//1)
+    renderText("GUMDROP.ttf",text,WIDTH//2 - 5*size,10,size)
+
+    hiscore = f" HIGHEST SURVIVAL TIME  {str(HISCORE)} secs"
+    size  =  int(0.05*WIDTH//1)
+    renderText("GUMDROP.ttf",hiscore,WIDTH//2 - 5*size,size+20,size)
+
     
 
     pygame.display.update()
