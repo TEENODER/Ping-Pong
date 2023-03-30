@@ -1,6 +1,6 @@
 # Ping Pong Game
 ***
-_Is A Game That Can Pe Played An Adult As Well As Teen With Survival Time Functionality_
+_Is A Game That Can Be Played By An Adult As Well As By Teen With Survival Time Functionality_
 
 ### SCREEN SHOT
 ***
